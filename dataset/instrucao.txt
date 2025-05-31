@@ -1,0 +1,1 @@
+Olá, baixe o arquivo ratings.csv em: https://www.kaggle.com/datasets/garymk/movielens-25m-dataset e o coloque nessa pasta.
