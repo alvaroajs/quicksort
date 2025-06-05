@@ -64,6 +64,7 @@ def particao(a, ini, fim, col_index):
     swap(a, i + 1, last_idx) 
     
     # Retorna o índice onde o pivô foi parar.
+    # print(i + 1, "é o índice do pivô após a partição.")
     return i + 1
 
 def quick_sort(a, ini=0, fim=None, col_index=0):
@@ -110,7 +111,7 @@ def read_csv_lines_manually(file_path, num_lines_to_read=None):
 # --- Bloco Principal de Execução ---
 if __name__ == "__main__":
     csv_file_path = '../dataset/ratings.csv'
-    lines_limit = 1000000
+    lines_limit = 100000
 
     print(f"Tentando ler as primeiras {lines_limit if lines_limit is not None else 'todas as'} linhas de DADOS de '{csv_file_path}' (ignorando a primeira linha):\n")
 
@@ -143,7 +144,7 @@ if __name__ == "__main__":
 
             print("\nPrimeiras 10 linhas de dados ORDENADAS por 'rating':")
             for i, row in enumerate(movie_data): # Imprime 'movie_data' diretamente, pois foi ordenada
-                if i < 10:
+                if i < 5:
                     print(row)
                 else:
                     break
