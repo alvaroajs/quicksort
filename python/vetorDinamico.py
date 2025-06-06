@@ -156,7 +156,8 @@ def ler_csv_para_vetor_dinamico(caminho_arquivo, num_linhas_para_ler=None):
 # --- Bloco Principal de Execução ---
 if __name__ == "__main__":
     caminho_csv = '../dataset/ratings.csv'
-    limite_linhas = 100000
+    limite_linhas = 5
+    indice_coluna_ordenacao = 3
 
     print(f"Tentando ler as primeiras {limite_linhas if limite_linhas is not None else 'todas as'} linhas de DADOS de '{caminho_csv}' (ignorando a primeira linha):")
 
@@ -175,7 +176,6 @@ if __name__ == "__main__":
                 print(linha)
 
             # Executa Quick Sort no vetor estático
-            indice_coluna_ordenacao = 1
             print(f"Iniciando ordenação de {len(dados_filme_estatico)} linhas pelo 'rating' (coluna índice {indice_coluna_ordenacao}) usando Mediana de Três (Recursiva e 'Low-Level')...")
             
             tempo_inicio = time.time()

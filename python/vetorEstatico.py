@@ -111,7 +111,8 @@ def read_csv_lines_manually(file_path, num_lines_to_read=None):
 # --- Bloco Principal de Execução ---
 if __name__ == "__main__":
     csv_file_path = '../dataset/ratings.csv'
-    lines_limit = 100000
+    lines_limit = 5
+    column_to_sort_by_index = 3 
 
     print(f"Tentando ler as primeiras {lines_limit if lines_limit is not None else 'todas as'} linhas de DADOS de '{csv_file_path}' (ignorando a primeira linha):\n")
 
@@ -129,7 +130,6 @@ if __name__ == "__main__":
                     break
 
             # Coluna para ordenar: 'rating' é a TERCEIRA coluna (índice 2)
-            column_to_sort_by_index = 1 
 
             print(f"\nIniciando ordenação de {len(movie_data)} linhas pelo 'rating' (coluna índice {column_to_sort_by_index}) usando Mediana de Três (Recursiva e 'Low-Level')...")
             
