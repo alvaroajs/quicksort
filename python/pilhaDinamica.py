@@ -43,6 +43,12 @@ class PilhaDinamica:
     def tamanho(self):
         """Retorna o número de elementos na pilha."""
         return self._tamanho
+    
+    def ver_topo(self):
+        """Retorna o item do topo sem removê-lo."""
+        if self.esta_vazia():
+            raise IndexError("Pilha vazia!")
+        return self.topo.dado
 
 # --- FUNÇÕES DE ORDENAÇÃO (mantidas do código original) ---
 
@@ -123,9 +129,10 @@ def read_csv_lines_manually(file_path, num_lines_to_read=None):
 if __name__ == "__main__":
     csv_file_path = '../dataset/ratings.csv'
     lines_limit = 100000
-    column_to_sort_by_index = 3  # Coluna do timestamp (4ª coluna)
+    column_to_sort_by_index = 3  # Coluna do rating (3ª coluna, índice 2)
 
     print(f"Tentando ler as primeiras {lines_limit} linhas de DADOS de '{csv_file_path}' (ignorando a primeira linha):")
+    print("Usando PILHA DINÂMICA (lista ligada) em vez de pilha estática\n")
 
     try:
         # ETAPA 1: Lê dados do CSV e empilha em pilha dinâmica
@@ -141,16 +148,19 @@ if __name__ == "__main__":
                     break
             
             # Cria pilha dinâmica e empilha os dados
+            print("\nEmpilhando dados na pilha dinâmica...")
             pilha_inicial = PilhaDinamica()
             for linha in movie_data:
                 pilha_inicial.empilhar(linha)
+            print(f"Tamanho da pilha dinâmica: {pilha_inicial.tamanho()}")
             
             # ETAPA 2: Desempilha para vetor e ordena
+            print("\nDesempilhando para vetor...")
             vetor_para_ordenar = []
             while not pilha_inicial.esta_vazia():
                 vetor_para_ordenar.append(pilha_inicial.desempilhar())
             
-            print(f"Iniciando ordenação de {len(vetor_para_ordenar)} linhas pelo 'rating' (coluna índice {column_to_sort_by_index}) usando Mediana de Três (Recursiva e 'Low-Level')...")
+            print(f"\nIniciando ordenação de {len(vetor_para_ordenar)} linhas pelo 'rating' (coluna índice {column_to_sort_by_index}) usando Mediana de Três (Recursiva)...")
             
             start_time = time.time()
             quick_sort(vetor_para_ordenar, col_index=column_to_sort_by_index)
@@ -160,35 +170,55 @@ if __name__ == "__main__":
             print(f"Ordenação concluída em {duration:.4f} segundos.")
 
             # ETAPA 3: Empilha resultado ordenado em pilha auxiliar
+            print("\nEmpilhando resultado ordenado em pilha auxiliar...")
             pilha_auxiliar = PilhaDinamica()
             for linha in vetor_para_ordenar:
                 pilha_auxiliar.empilhar(linha)
             
             # ETAPA 4: Desempilha da auxiliar para pilha final (inverte a ordem)
+            print("Transferindo para pilha final (invertendo ordem)...")
             pilha_final = PilhaDinamica()
             while not pilha_auxiliar.esta_vazia():
                 pilha_final.empilhar(pilha_auxiliar.desempilhar())
             
             # Mostra resultado final desempilhando da pilha final
+            print("\nDesempilhando resultado final...")
             resultado_final = []
             while not pilha_final.esta_vazia():
                 resultado_final.append(pilha_final.desempilhar())
             
-            print("Primeiras 5 linhas de dados ORDENADAS por 'rating':")
+            print("\nPrimeiras 5 linhas de dados ORDENADAS por 'rating' (ordem crescente):")
             for i, row in enumerate(resultado_final):
                 if i < 5:
-                    print(row)
+                    print(f"  Rating: {row[2]}, UserID: {row[0]}, MovieID: {row[1]}, Timestamp: {row[3]}")
                 else:
                     break
             
-            if len(resultado_final) > 1:
-                print(f"Últimas 2 linhas do dataset ordenado: {resultado_final[-2:]}")
-                # Verificação se a ordenação está correta no final da lista
-                if get_numeric_value(resultado_final[-2], column_to_sort_by_index) <= \
-                   get_numeric_value(resultado_final[-1], column_to_sort_by_index):
-                    print("Verificação básica do final da lista: OK.")
-                else:
-                    print("Verificação básica do final da lista: ERRO!")
+            if len(resultado_final) > 5:
+                print("\nÚltimas 5 linhas de dados ORDENADAS por 'rating' (ordem crescente):")
+                for i in range(max(0, len(resultado_final) - 5), len(resultado_final)):
+                    row = resultado_final[i]
+                    print(f"  Rating: {row[2]}, UserID: {row[0]}, MovieID: {row[1]}, Timestamp: {row[3]}")
+            
+            # Verificação da ordenação
+            print("\nVerificando integridade da ordenação...")
+            ordenado_corretamente = True
+            for i in range(1, len(resultado_final)):
+                if get_numeric_value(resultado_final[i-1], column_to_sort_by_index) > \
+                   get_numeric_value(resultado_final[i], column_to_sort_by_index):
+                    ordenado_corretamente = False
+                    break
+            
+            if ordenado_corretamente:
+                print("✓ Verificação completa: Dados estão corretamente ordenados em ordem CRESCENTE!")
+            else:
+                print("✗ Erro: Dados não estão corretamente ordenados!")
+            
+            # Estatísticas finais
+            print(f"\nEstatísticas finais:")
+            print(f"  - Total de linhas processadas: {len(resultado_final)}")
+            print(f"  - Menor rating: {resultado_final[0][2]}")
+            print(f"  - Maior rating: {resultado_final[-1][2]}")
 
         else:
             print("Nenhuma linha de dados foi lida ou o arquivo pode estar vazio após o cabeçalho.")

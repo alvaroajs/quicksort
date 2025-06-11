@@ -111,8 +111,8 @@ def read_csv_lines_manually(file_path, num_lines_to_read=None):
 # --- Bloco Principal de Execução ---
 if __name__ == "__main__":
     csv_file_path = '../dataset/ratings.csv'
-    lines_limit = 5
-    column_to_sort_by_index = 3 
+    lines_limit = 1000
+    column_to_sort_by_index = 2
 
     print(f"Tentando ler as primeiras {lines_limit if lines_limit is not None else 'todas as'} linhas de DADOS de '{csv_file_path}' (ignorando a primeira linha):\n")
 
