@@ -156,7 +156,7 @@ def ler_csv_para_vetor_dinamico(caminho_arquivo, num_linhas_para_ler=None):
 # --- Bloco Principal de Execução ---
 if __name__ == "__main__":
     caminho_csv = '../dataset/ratings.csv'
-    limite_linhas = 5
+    limite_linhas = 100
     indice_coluna_ordenacao = 3
 
     print(f"Tentando ler as primeiras {limite_linhas if limite_linhas is not None else 'todas as'} linhas de DADOS de '{caminho_csv}' (ignorando a primeira linha):")
