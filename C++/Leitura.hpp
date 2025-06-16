@@ -9,7 +9,7 @@
 // ratings -> timestamp
 
 void LeituraArquivos(vector<float>& vetor, int tam){
-    std::ifstream arquivo("dataset/elementos.csv");
+    std::ifstream arquivo("../dataset/ratings.csv");
 
     if (!arquivo.is_open()) {
         std::cerr << "Erro ao abrir o arquivo.\n";
