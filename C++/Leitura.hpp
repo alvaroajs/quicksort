@@ -1,42 +1,51 @@
+// Leitura.hpp
 #ifndef LEITURA_HPP
 #define LEITURA_HPP
 
-#include "QuickSort.hpp"
+#include <vector>
+#include <string>
 #include <fstream>
 #include <sstream>
-#include <string>
+#include <iostream>
 
-// ratings -> timestamp
+struct Rating {
+    int usuarioId;
+    int movieId;
+    float rating; // ou outro tipo, dependendo do que é
+    float tempo;       // 4ª coluna
+};
 
-void LeituraArquivos(vector<float>& vetor, int tam){
-    std::ifstream arquivo("../dataset/ratings.csv");
+std::vector<Rating> LeituraArquivos(int tam) {
 
-    if (!arquivo.is_open()) {
-        std::cerr << "Erro ao abrir o arquivo.\n";
-        return;
+    std::ifstream arquivo("dataset/ratings.csv");
+    std::vector<Rating> ratings;
+
+    std::string linha;
+    int lidos = 0;
+
+    while (lidos < tam && std::getline(arquivo, linha)) {
+        std::stringstream ss(linha);
+        std::string campo;
+        std::vector<std::string> campos;
+
+        while (std::getline(ss, campo, ',')) {
+            campos.push_back(campo);
+        }
+
+        if (campos.size() >= 4) {
+            Rating r;
+            r.usuarioId = std::stoi(campos[0]);
+            r.movieId    = std::stoi(campos[1]);
+            r.rating     = std::stof(campos[2]); // ou std::stoi/cast se for timestamp
+            r.tempo      = std::stof(campos[3]);
+            ratings.push_back(r);
+            lidos++;
+        }
     }
 
-    int i = 0;
-    std::string linha;
-    
-    do{
-        while (std::getline(arquivo, linha)) {
-            std::stringstream ss(linha);
-            std::string campo;
-            std::vector<std::string> campos;
-
-            while (std::getline(ss, campo, ',')) {
-                campos.push_back(campo);
-                vetor.push_back(stof(campos[3]));
-            }
-        }
-    }while(tam-- != 0);
-
     arquivo.close();
+    return ratings;
 
 }
-    
-
-
 
 #endif

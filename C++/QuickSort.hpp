@@ -1,45 +1,31 @@
 #ifndef QUICKSORT_HPP
 #define QUICKSORT_HPP
 
-#include "ListDin.hpp"
-#include "ListEst.hpp"
-
-#include "FilaDin.hpp"
-#include "FilaEst.hpp"
-
-#include "PilhaDin.hpp"
-#include "PilhaEst.hpp"
-
 #include <vector>
 #include <algorithm>
-
-using namespace std;
-
+#include "Leitura.hpp"
 
 class QuickSort {
 public:
-    // Ordena um std::vector<float>
-    static void ordenacao(std::vector<float>& arr) {
-        quickSortVector(arr, 0, arr.size() - 1);
+    static void ordenacao(std::vector<Rating>& arr) {
+        if(arr.empty()) return;
+        quickSort(arr, 0, static_cast<int>(arr.size()) - 1);
     }
 
-
 private:
-    // QuickSort para vector
-    static void quickSortVector(std::vector<float>& arr, float inicio, float fim) {
+    static void quickSort(std::vector<Rating>& arr, int inicio, int fim) {
         if (inicio < fim) {
-            float pivo = particionaVector(arr, inicio, fim);
-            quickSortVector(arr, inicio, pivo - 1);
-            quickSortVector(arr, pivo + 1, fim);
+            int pivo = particiona(arr, inicio, fim);
+            quickSort(arr, inicio, pivo - 1);
+            quickSort(arr, pivo + 1, fim);
         }
     }
 
-    // Partição para vector
-    static float particionaVector(std::vector<float>& arr, float inicio, float fim) {
-        float pivo = arr[fim];
-        float i = inicio - 1;
-        for (float j = inicio; j < fim; j++) {
-            if (arr[j] <= pivo) {
+    static int particiona(std::vector<Rating>& arr, int inicio, int fim) {
+        Rating pivo = arr[fim];
+        int i = inicio - 1;
+        for (int j = inicio; j < fim; j++) {
+            if (arr[j].tempo <= pivo.tempo) {
                 i++;
                 std::swap(arr[i], arr[j]);
             }
@@ -47,7 +33,6 @@ private:
         std::swap(arr[i + 1], arr[fim]);
         return i + 1;
     }
-
 };
 
 #endif

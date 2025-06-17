@@ -1,16 +1,15 @@
 #ifndef PILHADIN_HPP
 #define PILHADIN_HPP
 
-// Pilha Dinâmica (não há valor máximo, utiliza ponteiro)
-
 #include <iostream>
+#include "Leitura.hpp"
 
 class NoPilha {
 public:
-    float valor;
+    Rating valor;
     NoPilha* prox;
 
-    NoPilha(float v) : valor(v), prox(nullptr) {}
+    NoPilha(Rating v) : valor(v), prox(nullptr) {}
 };
 
 class PilhaDinamica {
@@ -19,7 +18,7 @@ public:
 
     PilhaDinamica() : topo(nullptr) {}
 
-    void empilhar(float valor) {
+    void empilhar(Rating valor) {
         NoPilha* novo = new NoPilha(valor);
         novo->prox = topo;
         topo = novo;
@@ -33,13 +32,8 @@ public:
         }
     }
 
-    void imprimir() {
-        NoPilha* atual = topo;
-        while (atual) {
-            std::cout << atual->valor << " ";
-            atual = atual->prox;
-        }
-        std::cout << "\n";
+    bool vazia() {
+        return topo == nullptr;
     }
 
     void limpar() {
@@ -50,14 +44,9 @@ public:
         }
     }
 
-    bool vazia(){
-        return topo == nullptr;
-    }
-
     ~PilhaDinamica() {
         limpar();
     }
-
 };
 
 #endif

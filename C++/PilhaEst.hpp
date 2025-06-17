@@ -2,24 +2,19 @@
 #define PILHAEST_HPP
 
 #include <iostream>
-
-// Pilha Estática (precisa de um valor máximo para ser armazenado)
-
-#define MAX 100
-
-#include <iostream>
 #include <vector>
+#include "Leitura.hpp"
 
 class PilhaEstatica {
-private:
+public:
     int topo;
     int capacidade;
 
-public:
-    std::vector<float> dados;
+    std::vector<Rating> dados;
+
     PilhaEstatica(int tamanho) : dados(tamanho), topo(0), capacidade(tamanho) {}
-    
-    void push(float valor) {
+
+    void push(Rating valor) {
         if (cheia()) {
             std::cout << "Erro: Pilha cheia!\n";
             return;
@@ -35,18 +30,6 @@ public:
         topo--;
     }
 
-    void topoElemento() const {
-        if (vazia()) {
-            std::cout << "Erro: Pilha vazia!\n";
-            return;
-        }
-        std::cout << "Topo: " << dados[topo - 1] << "\n";
-    }
-
-    void tamanho() const {
-        std::cout << "Tamanho: " << topo << "\n";
-    }
-
     bool vazia() const {
         return topo == 0;
     }
@@ -54,5 +37,12 @@ public:
     bool cheia() const {
         return topo == capacidade;
     }
+
+    void limpar() {
+        topo = 0;
+        dados.clear();
+        dados.resize(capacidade);
+    }
 };
+
 #endif

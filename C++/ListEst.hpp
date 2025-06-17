@@ -3,14 +3,15 @@
 
 #include <iostream>
 #include <vector>
+#include "Leitura.hpp"
 
-class ListaEstatica     {
+class ListaEstatica {
 public:
-    std::vector<float> dados;
+    std::vector<Rating> dados;
 
-    ListaEstatica(){}
+    ListaEstatica() {}
 
-    void inserir(int valor) {
+    void inserir(Rating valor) {
         dados.push_back(valor);
     }
 
