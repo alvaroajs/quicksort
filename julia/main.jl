@@ -228,9 +228,8 @@ target_structure = from_vector(subset, struct_type)
 
 # Medir tempo de ordenação
 println("⏱️  Ordenando dados...")
-start_time = time()
-sorted_struct = sort_structure(target_structure)
-elapsed = time() - start_time
+sorted_struct, elapsed = sort_structure(target_structure)
+
 
 # Converter de volta para vetor
 sorted_vec = to_vector(sorted_struct)
@@ -249,11 +248,15 @@ println("- Tempo de ordenação: $(round(elapsed; digits=6)) segundos")
 
 return elapsed
 end
-
 function sort_structure(structure)
-vec = to_vector(structure)
-quicksort!(vec)
-return from_vector(vec, typeof(structure))
+    start_time = time()
+
+    vec = to_vector(structure)          # ← Aqui desempilha/desenfileira
+    quicksort!(vec)                     # ← Ordena o vetor
+    sorted = from_vector(vec, typeof(structure))  # ← Reempilha/reinfileira
+
+    elapsed = time() - start_time
+    return sorted, elapsed
 end
 
 # Menu principal

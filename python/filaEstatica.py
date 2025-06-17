@@ -126,7 +126,7 @@ def read_csv_lines_manually(file_path, num_lines_to_read=None):
 
 if __name__ == "__main__":
     csv_file_path = '../dataset/ratings.csv'
-    lines_limit = 100000
+    lines_limit = 5
     column_to_sort_by_index = 3  # Coluna do timestamp (4ª coluna)
 
     print(f"Tentando ler as primeiras {lines_limit} linhas de DADOS de '{csv_file_path}' (ignorando a primeira linha):")

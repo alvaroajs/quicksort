@@ -89,7 +89,7 @@ int main(void) {
     printf("Quantidade de registros a ler: ");
     scanf("%d", &tam);
 
-    Rating* dados = ler_ratings("dataset/ratings.csv", tam, &lidos);
+    Rating* dados = ler_ratings("../dataset/ratings.csv", tam, &lidos);
     if (!dados) return 1;
 
     clock_t inicio, fim;
