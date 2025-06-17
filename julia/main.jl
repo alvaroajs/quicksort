@@ -228,9 +228,8 @@ target_structure = from_vector(subset, struct_type)
 
 # Medir tempo de ordenação
 println("⏱️  Ordenando dados...")
-start_time = time()
-sorted_struct = sort_structure(target_structure)
-elapsed = time() - start_time
+sorted_struct, elapsed = sort_structure(target_structure)
+
 
 # Converter de volta para vetor
 sorted_vec = to_vector(sorted_struct)
@@ -241,7 +240,7 @@ struct_name = string(typeof(sorted_struct))[1:end-2]
 output_filename = "sorted_$(struct_name)_$(n)_$(timestamp).csv"
 
 println("\n💾 Salvando resultados em $output_filename")
-save_ratings(output_filename, sorted_vec)
+#save_ratings(output_filename, sorted_vec)
 
 println("\n📋 Resultados:")
 println("- Tempo de ordenação: $(round(elapsed; digits=6)) segundos")
@@ -249,11 +248,15 @@ println("- Tempo de ordenação: $(round(elapsed; digits=6)) segundos")
 
 return elapsed
 end
-
 function sort_structure(structure)
-vec = to_vector(structure)
-quicksort!(vec)
-return from_vector(vec, typeof(structure))
+    start_time = time()
+
+    vec = to_vector(structure)          # ← Aqui desempilha/desenfileira
+    quicksort!(vec)                     # ← Ordena o vetor
+    sorted = from_vector(vec, typeof(structure))  # ← Reempilha/reinfileira
+
+    elapsed = time() - start_time
+    return sorted, elapsed
 end
 
 # Menu principal
@@ -264,7 +267,6 @@ filename = find_ratings_file()
 filename === nothing && return
 
 println("\n📂 Carregando dados...")
-ratings = read_ratings(filename, maximum(input_sizes))
 
 structures = [
     ("Lista (Vetor)", VectorList),
@@ -273,18 +275,18 @@ structures = [
     ("Pilha Encadeada", LinkedStack),
     ("Fila (Vetor)", VectorQueue),
     ("Fila Encadeada", LinkedQueue)
-]
-
-while true
-    println("\n" * "="^50)
-    println("MENU PRINCIPAL")
-    println("="^50)
-
-    # Escolher estrutura
-    println("\n📚 Escolha a estrutura de dados:")
-    for (i, (name, _)) in enumerate(structures)
-        println("$i. $name")
-    end
+    ]
+    
+    while true
+        println("\n" * "="^50)
+        println("MENU PRINCIPAL")
+        println("="^50)
+        
+        # Escolher estrutura
+        println("\n📚 Escolha a estrutura de dados:")
+        for (i, (name, _)) in enumerate(structures)
+            println("$i. $name")
+        end
     println("0. Sair")
     print("\nOpção: ")
     choice = tryparse(Int, readline())
@@ -293,7 +295,7 @@ while true
     1 ≤ choice ≤ length(structures) || (println("Opção inválida!"); continue)
     struct_type = structures[choice][2]
     struct_name = structures[choice][1]
-
+    
     # Escolher tamanho
     println("\n📏 Escolha o tamanho dos dados:")
     for (i, size) in enumerate(input_sizes)
@@ -304,13 +306,14 @@ while true
     size_choice === nothing && continue
     1 ≤ size_choice ≤ length(input_sizes) || (println("Opção inválida!"); continue)
     input_size = input_sizes[size_choice]
-
+    
     # Confirmar
     println("\n🚀 Executando:")
     println("- Estrutura: $struct_name")
     println("- Tamanho: $input_size registros")
-
+    
     # Executar ordenação e salvamento
+    ratings = read_ratings(filename, maximum(input_size))
     sort_and_save(ratings, struct_type, input_size)
 end
 
@@ -321,7 +324,7 @@ function find_ratings_file()
 possible_paths = [
     "ratings.csv",
     "../ratings.csv",
-    "data/ratings.csv",
+    "dataset/ratings.csv",
     "../data/ratings.csv",
     joinpath(dirname(@__FILE__), "ratings.csv"),
     joinpath(dirname(@__FILE__), "..", "ratings.csv")
