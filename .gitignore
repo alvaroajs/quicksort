@@ -1,3 +1,63 @@
-dataset/ratings.csv
-C++/main
-C/main
+# === Pastas geradas automaticamente ===
+bin/
+obj/
+build/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# === Arquivos de compilação (C/C++) ===
+*.exe
+*.out
+*.o
+*.a
+*.so
+*.dll
+*.lib
+*.dylib
+
+# === C# ===
+*.pdb
+*.user
+*.suo
+.vs/
+.vscode/
+
+# === Python ===
+*.pyc
+*.pyo
+*.pyd
+env/
+venv/
+*.venv/
+dist/
+
+# === Julia ===
+*.jl.cov
+*.jl.*.cov
+*.jl.mem
+*.DS_Store
+
+# === Outros arquivos temporários ===
+*.log
+*.bak
+*.swp
+*~
+.DS_Store
+Thumbs.db
+
+# === IDE/Editores ===
+.idea/
+.vscode/
+*.code-workspace
+
+# === Dados grandes ou sensíveis ===
+*.csv
+*.data
+*.feather
+*.hdf5
+*.mat
+*.npy
+*.pkl
+*.pickle
