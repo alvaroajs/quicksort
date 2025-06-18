@@ -60,7 +60,7 @@ println("   Tamanho: $(length(ratings)) registros")
 end
 
 # Função segura para ler o CSV
-function read_ratings(filename, max_entries=1_000_000)
+function read_ratings(filename, max_entries=26_000_000)
 ratings = Rating[]
 try
     open(filename) do f
@@ -173,36 +173,60 @@ end
 end
 
 # Algoritmo Quicksort otimizado
-function quicksort!(arr::AbstractVector, low=1, high=length(arr))
-@inbounds while low < high
-    high - low <= 20 && return insertionsort!(arr, low, high)
-    pi = partition!(arr, low, high)
-    if pi - low < high - pi
-        quicksort!(arr, low, pi - 1)
-        low = pi + 1
-    else
-        quicksort!(arr, pi + 1, high)
-        high = pi - 1
+function quicksort!(arr::AbstractVector, low::Int=1, high::Int=length(arr))
+    @inbounds while low < high
+        # em vez de return, faz insertion sort e sai do while
+        if high - low <= 20
+            insertionsort!(arr, low, high)
+            break
+        end
+
+        pi = partition!(arr, low, high)
+        if pi - low < high - pi
+            quicksort!(arr, low, pi - 1)
+            low = pi + 1
+        else
+            quicksort!(arr, pi + 1, high)
+            high = pi - 1
+        end
     end
-end
 end
 
-function partition!(arr::AbstractVector, low, high)
-pivot = arr[(low + high) ÷ 2].timestamp
-i, j = low, high
-@inbounds while true
-    while arr[i].timestamp < pivot
-        i += 1
+function partition!(arr::AbstractVector, low::Int, high::Int)
+    # --- Mediana de Três para escolher o pivô ---
+    mid = (low + high) ÷ 2
+    a, b, c = arr[low].timestamp, arr[mid].timestamp, arr[high].timestamp
+
+    # ordena os três valores e coloca o médiano em arr[high]
+    if a > b
+        arr[low], arr[mid] = arr[mid], arr[low]
+        a, b = b, a
     end
-    while arr[j].timestamp > pivot
-        j -= 1
+    if a > c
+        arr[low], arr[high] = arr[high], arr[low]
+        a, c = c, a
     end
-    i >= j && return j
-    arr[i], arr[j] = arr[j], arr[i]
-    i += 1
-    j -= 1
+    if b > c
+        arr[mid], arr[high] = arr[high], arr[mid]
+        b, c = c, b
+    end
+    # agora b é o pivô; swap para o fim
+    arr[mid], arr[high] = arr[high], arr[mid]
+
+    # --- Lomuto usando esse pivô ---
+    pivot = arr[high].timestamp
+    i = low
+    @inbounds for j in low:high-1
+        if arr[j].timestamp <= pivot
+            arr[i], arr[j] = arr[j], arr[i]
+            i += 1
+        end
+    end
+    arr[i], arr[high] = arr[high], arr[i]
+    return i
 end
-end
+
+
 
 function insertionsort!(arr::AbstractVector, low=1, high=length(arr))
 @inbounds for i in low+1:high
@@ -216,9 +240,22 @@ function insertionsort!(arr::AbstractVector, low=1, high=length(arr))
 end
 return arr
 end
+# Formata um intervalo de tempo em s / ms / µs conforme a magnitude
+function format_time(elapsed::Float64)
+    if elapsed ≥ 1
+        return "$(round(elapsed; digits=6)) s"
+    elseif elapsed ≥ 1e-3
+        # milissegundos, 3 casas
+        return "$(round(elapsed*1e3; digits=3)) ms"
+    else
+        # microssegundos, sem casas decimais
+        return "$(round(elapsed*1e6; digits=0)) µs"
+    end
+end
 
 # Função para ordenar e salvar
-function sort_and_save(ratings::Vector{Rating}, struct_type, input_size)
+function sort_and_save(ratings::Vector{Rating}, struct_type, input_size, save_csv)
+start_ns = time_ns()
 n = min(input_size, length(ratings))
 println("\n🔨 Preparando $n registros para ordenação...")
 
@@ -228,40 +265,39 @@ target_structure = from_vector(subset, struct_type)
 
 # Medir tempo de ordenação
 println("⏱️  Ordenando dados...")
-sorted_struct, elapsed = sort_structure(target_structure)
 
+sorted_struct = sort_structure(target_structure)
 
 # Converter de volta para vetor
 sorted_vec = to_vector(sorted_struct)
+elapsed = (time_ns() - start_ns) / 1e9
 
-# Salvar resultados
-timestamp = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
-struct_name = string(typeof(sorted_struct))[1:end-2]
-output_filename = "sorted_$(struct_name)_$(n)_$(timestamp).csv"
 
-println("\n💾 Salvando resultados em $output_filename")
-#save_ratings(output_filename, sorted_vec)
-
+if save_csv
+    timestamp = Dates.format(now(), "yyyy-mm-dd_HH-MM-SS")
+    filename_out = "sorted_$(string(typeof(sorted_struct))[1:end-2])_$(input_size)_$(timestamp).csv"
+    println("\n💾 Salvando resultados em $filename_out")
+    save_ratings(filename_out, sorted_vec)
+end
+formatted = format_time(elapsed)
 println("\n📋 Resultados:")
-println("- Tempo de ordenação: $(round(elapsed; digits=6)) segundos")
-
+println("- Tempo de ordenação: $(format_time(elapsed))")
 
 return elapsed
 end
+
 function sort_structure(structure)
-    start_time = time()
-
-    vec = to_vector(structure)          # ← Aqui desempilha/desenfileira
-    quicksort!(vec)                     # ← Ordena o vetor
-    sorted = from_vector(vec, typeof(structure))  # ← Reempilha/reinfileira
-
-    elapsed = time() - start_time
-    return sorted, elapsed
+vec = to_vector(structure)
+quicksort!(vec)
+return from_vector(vec, typeof(structure))
 end
 
 # Menu principal
 function main()
-input_sizes = [100, 1000, 10000, 100000, 1000000]
+println("Deseja salvar o resultado ordenado em CSV? (s/n): ")
+save_csv = lowercase(readline()) in ["s", "sim"]
+
+input_sizes = [100, 1000, 10000, 100000, 1000000, 10000000, 100000000]
 
 filename = find_ratings_file()
 filename === nothing && return
@@ -313,8 +349,8 @@ structures = [
     println("- Tamanho: $input_size registros")
     
     # Executar ordenação e salvamento
-    ratings = read_ratings(filename, maximum(input_size))
-    sort_and_save(ratings, struct_type, input_size)
+    ratings = read_ratings(filename, input_size)
+    sort_and_save(ratings, struct_type, input_size, save_csv)
 end
 
 println("\nPrograma encerrado. Até mais! 👋")
@@ -324,7 +360,7 @@ function find_ratings_file()
 possible_paths = [
     "ratings.csv",
     "../ratings.csv",
-    "dataset/ratings.csv",
+    "../dataset/ratings.csv",
     "../data/ratings.csv",
     joinpath(dirname(@__FILE__), "ratings.csv"),
     joinpath(dirname(@__FILE__), "..", "ratings.csv")
