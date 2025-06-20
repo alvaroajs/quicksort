@@ -113,7 +113,7 @@ class Program
             Console.WriteLine("- Tamanho: " + inputSize + " registros");
 
             var ratings = ReadRatings(filename, inputSize);
-            SortAndSave(ratings, structType, inputSize, saveCsv);
+            SortAndMeasureMultipleTimes(ratings, structType, inputSize, saveCsv);
         }
 
         Console.WriteLine("\nPrograma encerrado. Até mais! 👋");
@@ -138,10 +138,10 @@ class Program
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "dataset", "ratings.csv"),
         
         // Caminho absoluto típico (ex: seu desktop)
-        @"C:\Users\Usuario\Desktop\Quicksort\dataset\ratings.csv",
+        @"C:\Users\Usuario\Desktop\ordenacaoAEDS-main\dataset\ratings.csv",
         
         // Caminho para Linux/WSL (se aplicável)
-        "/home/seu_usuario/projetos/Quicksort/dataset/ratings.csv",
+        "/home/seu_usuario/projetos/ordenacaoAEDS-main/dataset/ratings.csv",
         
         // Adicione outros caminhos comuns aqui...
     };
@@ -209,7 +209,17 @@ class Program
         return ratings;
     }
 
-    static void SortAndSave(List<Rating> ratings, Type structType, int inputSize, bool saveCsv)
+    static void SortAndMeasureMultipleTimes(List<Rating> ratings, Type structType, int inputSize, bool saveCsv)
+{
+    string metricFile = "metricas.txt";
+
+    // Cria ou sobrescreve e escreve cabeçalho
+    using (var writer = new StreamWriter(metricFile, true))
+    {
+        writer.WriteLine($"{structType.Name} {inputSize}");
+    }
+
+    for (int i = 1; i <= 5; i++)
     {
         var stopwatch = Stopwatch.StartNew();
 
@@ -219,15 +229,22 @@ class Program
         stopwatch.Stop();
         var elapsed = stopwatch.Elapsed;
 
-        Console.WriteLine("\n📋 Resultados:");
-        Console.WriteLine("- Tempo de ordenação: " + FormatTime(elapsed));
+        Console.WriteLine($"⏱️ Execução {i}: {FormatTime(elapsed)}");
+
+        // Anexa ao arquivo
+        using (var writer = new StreamWriter(metricFile, true))
+        {
+            writer.WriteLine(elapsed.TotalSeconds.ToString("F6", CultureInfo.InvariantCulture));
+        }
 
         if (saveCsv)
         {
-            string filename = $"sorted_{structType.Name}_{inputSize}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+            string filename = $"sorted_{structType.Name}_{inputSize}_run{i}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
             SaveRatings(filename, subset);
         }
     }
+}
+
 
     static void SaveRatings(string filename, List<Rating> ratings)
     {

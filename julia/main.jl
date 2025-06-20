@@ -9,6 +9,7 @@ movieId::Int
 rating::Float64
 timestamp::Int
 end
+const ARQ = "metricas.txt"
 
 # Nó para estruturas encadeadas
 mutable struct Node
@@ -281,6 +282,7 @@ if save_csv
 end
 formatted = format_time(elapsed)
 println("\n📋 Resultados:")
+
 println("- Tempo de ordenação: $(format_time(elapsed))")
 
 return elapsed
@@ -348,9 +350,23 @@ structures = [
     println("- Estrutura: $struct_name")
     println("- Tamanho: $input_size registros")
     
-    # Executar ordenação e salvamento
+     # Após ler ratings:
     ratings = read_ratings(filename, input_size)
-    sort_and_save(ratings, struct_type, input_size, save_csv)
+
+    # (Re)cria o metricas.txt e escreve o cabeçalho
+    open(ARQ, "a") do io
+        println(io, "$struct_type $input_size")
+    end
+
+    # Chama 5 vezes e anexa o elapsed bruto
+    for i in 1:5
+        elapsed = sort_and_save(ratings, struct_type, input_size, save_csv)
+        open(ARQ, "a") do io
+            println(io, elapsed)
+        end
+    end
+
+    println("\nPrograma encerrado. Até mais! 👋")
 end
 
 println("\nPrograma encerrado. Até mais! 👋")
@@ -361,7 +377,8 @@ possible_paths = [
     "ratings.csv",
     "../ratings.csv",
     "../dataset/ratings.csv",
-    "../data/ratings.csv",
+    "../../dataset/ratings.csv",
+    "dataset/ratings.csv",
     joinpath(dirname(@__FILE__), "ratings.csv"),
     joinpath(dirname(@__FILE__), "..", "ratings.csv")
 ]
