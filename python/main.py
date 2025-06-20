@@ -104,23 +104,56 @@ class PilhaDinamica:
         return self._tamanho
 
 class FilaEstatica:
-    """Implementação de fila estática usando lista Python."""
-    def __init__(self):
-        self.fila = []
+    """Implementação de fila estática otimizada usando buffer circular."""
+    def __init__(self, tamanho_inicial=1000):
+        self.capacidade = tamanho_inicial
+        self.fila = [None] * self.capacidade
+        self.inicio = 0
+        self.fim = 0
+        self.tamanho = 0
+    
+    def _expandir(self):
+        """Expande a capacidade da fila quando necessário."""
+        nova_capacidade = self.capacidade * 2
+        nova_fila = [None] * nova_capacidade
+        
+        # Copia elementos para nova fila
+        for i in range(self.tamanho):
+            nova_fila[i] = self.fila[(self.inicio + i) % self.capacidade]
+        
+        self.fila = nova_fila
+        self.capacidade = nova_capacidade
+        self.inicio = 0
+        self.fim = self.tamanho
     
     def enfileirar(self, item):
-        self.fila.append(item)
+        """Adiciona um item no final da fila - O(1)"""
+        if self.tamanho == self.capacidade:
+            self._expandir()
+        
+        self.fila[self.fim] = item
+        self.fim = (self.fim + 1) % self.capacidade
+        self.tamanho += 1
     
     def desenfileirar(self):
-        if not self.esta_vazia():
-            return self.fila.pop(0)
-        return None
+        """Remove e retorna o item do início da fila - O(1)"""
+        if self.esta_vazia():
+            return None
+        
+        item = self.fila[self.inicio]
+        self.fila[self.inicio] = None  # Limpa referência
+        self.inicio = (self.inicio + 1) % self.capacidade
+        self.tamanho -= 1
+        
+        return item
     
     def esta_vazia(self):
-        return len(self.fila) == 0
+        """Verifica se a fila está vazia."""
+        return self.tamanho == 0
     
     def tamanho(self):
-        return len(self.fila)
+        """Retorna o número de elementos na fila."""
+        return self.tamanho
 
 class FilaDinamica:
     """Implementação de fila dinâmica usando lista ligada."""
@@ -358,18 +391,21 @@ def ordenar_com_estrutura(dados, tipo_estrutura, coluna_ordenacao):
     duration = end_time - start_time
     
     print(f"Ordenação concluída em {duration:.4f} segundos.")
-    print("Primeiras 5 linhas de dados ORDENADAS por 'timestamp':")
-    for i, row in enumerate(vetor[:5]):
-        print(row)
+
+    with open("metricas.txt", "a") as f:
+        f.write(f"{duration:.4f}\n")
+    # print("Primeiras 5 linhas de dados ORDENADAS por 'timestamp':")
+    # for i, row in enumerate(vetor[:5]):
+    #     print(row)
     
-    if len(vetor) > 1:
-        print(f"Últimas 2 linhas do dataset ordenado: {vetor[-2:]}")
-        # Verificação se a ordenação está correta no final da lista
-        if get_numeric_value(vetor[-2], coluna_ordenacao) <= \
-           get_numeric_value(vetor[-1], coluna_ordenacao):
-            print("Verificação básica do final da lista: OK.")
-        else:
-            print("Verificação básica do final da lista: ERRO!")
+    # if len(vetor) > 1:
+    #     print(f"Últimas 2 linhas do dataset ordenado: {vetor[-2:]}")
+    #     # Verificação se a ordenação está correta no final da lista
+    #     if get_numeric_value(vetor[-2], coluna_ordenacao) <= \
+    #        get_numeric_value(vetor[-1], coluna_ordenacao):
+    #         print("Verificação básica do final da lista: OK.")
+    #     else:
+    #         print("Verificação básica do final da lista: ERRO!")
     
     return duration
 
@@ -440,8 +476,13 @@ def main():
                 print(row)
             
             # Executar ordenação
-            ordenar_com_estrutura(dados, tipo_estrutura, coluna_ordenacao)
-            
+            with open("metricas.txt", "a") as f:
+                f.write(f"{nome_estrutura} - {tamanho_dados} linhas\n")
+            for i in range(10):
+                print(f"\nTentativa {i + 1} de ordenação com {nome_estrutura}...")
+                ordenar_com_estrutura(dados, tipo_estrutura, coluna_ordenacao)
+            f.write(f"\n\n")
+
         except ValueError:
             print("Por favor, digite um número válido!")
         except Exception as e:
