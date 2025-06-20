@@ -61,3 +61,5 @@ Thumbs.db
 *.npy
 *.pkl
 *.pickle
+
+python/pilhaDinamica.py && python/pilhaEstatica.py && python/pilhaListaEncadeada.py && python/filaDinamica.py && python/filaEstatica.py && python/filaListaEncadeada.py && python/queue.py && python/stack.py && python/linkedList.py && python/linkedList2.py && python/linkedList3.py && python/linkedList4.py && python/linkedList5.py && python/linkedList6.py && python/linkedList7.py && python/linkedList8.py && python/linkedList9.py
