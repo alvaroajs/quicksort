@@ -138,10 +138,10 @@ class Program
         Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "dataset", "ratings.csv"),
         
         // Caminho absoluto típico (ex: seu desktop)
-        @"C:\Users\Usuario\Desktop\ordenacaoAEDS-main\dataset\ratings.csv",
+        @"/Desktop/ordenacaoAEDS/dataset/ratings.csv",
         
         // Caminho para Linux/WSL (se aplicável)
-        "/home/seu_usuario/projetos/ordenacaoAEDS-main/dataset/ratings.csv",
+        "../../dataset/ratings.csv",
         
         // Adicione outros caminhos comuns aqui...
     };
@@ -219,7 +219,7 @@ class Program
         writer.WriteLine($"{structType.Name} {inputSize}");
     }
 
-    for (int i = 1; i <= 5; i++)
+    for (int i = 1; i <= 10; i++)
     {
         var stopwatch = Stopwatch.StartNew();
 

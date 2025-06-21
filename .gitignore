@@ -62,6 +62,8 @@ Thumbs.db
 *.pkl
 *.pickle
 
+julia/main.py
+
 #python
 pilhaDinamica.py
 pilhaEstatica.py
@@ -70,3 +72,5 @@ vetorEstatico.py
 filaEstatica.py
 filaDinamica.py
 benchmark.py
+test_automator.py
+metricas.txt

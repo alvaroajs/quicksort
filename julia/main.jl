@@ -358,8 +358,8 @@ structures = [
         println(io, "$struct_type $input_size")
     end
 
-    # Chama 5 vezes e anexa o elapsed bruto
-    for i in 1:5
+    # Chama 10 vezes e anexa o elapsed bruto
+    for i in 1:10
         elapsed = sort_and_save(ratings, struct_type, input_size, save_csv)
         open(ARQ, "a") do io
             println(io, elapsed)
