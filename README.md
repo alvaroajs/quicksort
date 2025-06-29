@@ -2,6 +2,7 @@
 
 ## 📖 Sobre o Projeto  
 Este projeto, desenvolvido como trabalho universitário, analisa **o desempenho do algoritmo Quick Sort** em diferentes linguagens de programação (C, C++, C#, Python e Julia) e estruturas de dados (lista, pilha e fila, em versões estáticas e dinâmicas). O foco é comparar tempos de ordenação usando como base os *timestamps* do arquivo `ratings.csv` do conjunto MovieLens 25M. O experimento inclui todo o *pipeline* de ordenação – extração, ordenação e reinserção – e foi executado em volumes de 100 a 1.000.000 de registros em três cenários de ordem inicial.
+
 ---
 
 ## 🎬 Visualização do Algoritmo QuickSort
