@@ -220,7 +220,23 @@ Este documento de 10 páginas contém:
 - Discussão sobre aplicações práticas
 - Limitações e trabalhos futuros
 
+## 📽️ Apresentação em Slides
 
+Para uma visão concisa, visual e didática dos principais pontos do projeto, acesse nossos slides oficiais em PDF:
+
+[![Slides](https://img.shields.io/badge/📄_Slides_PDF-EC1C24?style=flat&logo=adobeacrobatreader&logoColor=white)](https://github.com/alvaroajs/quicksort/blob/main/assets/pdf/slide_QUICKSORT_AED-1.pdf)  
+**Slides da Apresentação: Algoritmo QuickSort e Análise Experimental**  
+*(Autores: Álvaro Silva, Arthur Mendonça, Arthur Santana, Júlia D'Moura, Luiz Fernando)*
+
+Este material aborda:
+
+- 📌 **Fundamentação teórica** do algoritmo QuickSort (origem, conceito de pivô, estratégia divide-and-conquer)
+- 🧠 **Variações do pivô** e seu impacto na complexidade computacional
+- ⚙️ **Testes experimentais em estruturas** (lista estática, lista dinâmica, pilha, fila)
+- 📊 **Análise comparativa entre linguagens**: Python, Julia, C#, C e C++
+- 💡 **Aplicações práticas** do algoritmo em compiladores, sistemas embarcados e bancos de dados
+- 📈 **Gráficos de desempenho** com escalas logarítmicas para diferentes estruturas
+- ✅ **Conclusões e melhorias futuras** baseadas nos resultados dos testes
 ## 📂 ESTRUTURA DO PROJETO
 ```text
 projeto-aeds-quicksort/
