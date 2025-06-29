@@ -429,7 +429,7 @@ def main():
     
     tamanhos = [100, 1000, 10000, 100000, 1000000]
     
-    
+    # Coluna para ordenação (timestamp)
     coluna_ordenacao = 3
     
     while True:
