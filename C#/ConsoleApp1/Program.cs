@@ -1,7 +1,4 @@
-﻿// Tradução inicial do código Julia para C#
-// O código implementa estruturas de dados e ordenação de registros de avaliação de filmes
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
@@ -16,9 +13,59 @@ public class Rating
 }
 
 // Estruturas de dados baseadas em vetor
-public class VectorList { public List<Rating> Data = new(); }
-public class VectorStack { public List<Rating> Data = new(); }
-public class VectorQueue { public List<Rating> Data = new(); }
+public class VectorList 
+{ 
+    public List<Rating> Data = new(); 
+    
+    public void Add(Rating item) => Data.Add(item);
+    public int Count => Data.Count;
+    public Rating[] ToArray() => Data.ToArray();
+    public void FromArray(Rating[] array) 
+    {
+        Data.Clear();
+        Data.AddRange(array);
+    }
+}
+
+public class VectorStack 
+{ 
+    public List<Rating> Data = new(); 
+    
+    public void Push(Rating item) => Data.Add(item);
+    public Rating Pop() => Data.Count > 0 ? Data[^1] : null;
+    public bool IsEmpty => Data.Count == 0;
+    public int Count => Data.Count;
+    
+    public Rating[] ToArray() => Data.ToArray();
+    public void FromArray(Rating[] array) 
+    {
+        Data.Clear();
+        Data.AddRange(array);
+    }
+}
+
+public class VectorQueue 
+{ 
+    public List<Rating> Data = new(); 
+    
+    public void Enqueue(Rating item) => Data.Add(item);
+    public Rating Dequeue() 
+    {
+        if (Data.Count == 0) return null;
+        var item = Data[0];
+        Data.RemoveAt(0);
+        return item;
+    }
+    public bool IsEmpty => Data.Count == 0;
+    public int Count => Data.Count;
+    
+    public Rating[] ToArray() => Data.ToArray();
+    public void FromArray(Rating[] array) 
+    {
+        Data.Clear();
+        Data.AddRange(array);
+    }
+}
 
 // Estruturas encadeadas
 public class Node
@@ -32,12 +79,88 @@ public class LinkedList
 {
     public Node Head;
     public int Length = 0;
+    
+    public void Add(Rating item)
+    {
+        var newNode = new Node(item);
+        if (Head == null)
+        {
+            Head = newNode;
+        }
+        else
+        {
+            var current = Head;
+            while (current.Next != null)
+                current = current.Next;
+            current.Next = newNode;
+        }
+        Length++;
+    }
+    
+    public Rating[] ToArray()
+    {
+        var array = new Rating[Length];
+        var current = Head;
+        for (int i = 0; i < Length; i++)
+        {
+            array[i] = current.Data;
+            current = current.Next;
+        }
+        return array;
+    }
+    
+    public void FromArray(Rating[] array)
+    {
+        Head = null;
+        Length = 0;
+        foreach (var item in array)
+            Add(item);
+    }
 }
 
 public class LinkedStack
 {
     public Node Top;
     public int Length = 0;
+    
+    public void Push(Rating item)
+    {
+        var newNode = new Node(item) { Next = Top };
+        Top = newNode;
+        Length++;
+    }
+    
+    public Rating Pop()
+    {
+        if (Top == null) return null;
+        var item = Top.Data;
+        Top = Top.Next;
+        Length--;
+        return item;
+    }
+    
+    public bool IsEmpty => Top == null;
+    
+    public Rating[] ToArray()
+    {
+        var array = new Rating[Length];
+        var current = Top;
+        for (int i = 0; i < Length; i++)
+        {
+            array[i] = current.Data;
+            current = current.Next;
+        }
+        return array;
+    }
+    
+    public void FromArray(Rating[] array)
+    {
+        Top = null;
+        Length = 0;
+        // Push in reverse order to maintain original order
+        for (int i = array.Length - 1; i >= 0; i--)
+            Push(array[i]);
+    }
 }
 
 public class LinkedQueue
@@ -45,6 +168,53 @@ public class LinkedQueue
     public Node Front;
     public Node Rear;
     public int Length = 0;
+    
+    public void Enqueue(Rating item)
+    {
+        var newNode = new Node(item);
+        if (Front == null)
+        {
+            Front = Rear = newNode;
+        }
+        else
+        {
+            Rear.Next = newNode;
+            Rear = newNode;
+        }
+        Length++;
+    }
+    
+    public Rating Dequeue()
+    {
+        if (Front == null) return null;
+        var item = Front.Data;
+        Front = Front.Next;
+        if (Front == null) Rear = null;
+        Length--;
+        return item;
+    }
+    
+    public bool IsEmpty => Front == null;
+    
+    public Rating[] ToArray()
+    {
+        var array = new Rating[Length];
+        var current = Front;
+        for (int i = 0; i < Length; i++)
+        {
+            array[i] = current.Data;
+            current = current.Next;
+        }
+        return array;
+    }
+    
+    public void FromArray(Rating[] array)
+    {
+        Front = Rear = null;
+        Length = 0;
+        foreach (var item in array)
+            Enqueue(item);
+    }
 }
 
 class Program
@@ -61,7 +231,7 @@ class Program
     {
         var saveCsv = AskYesNo("Deseja salvar o resultado ordenado em CSV? (s/n): ");
 
-        var inputSizes = new[] { 100, 1000, 10000, 100000, 1000000 , 10000000, 26000000 };
+        var inputSizes = new[] { 100, 1000, 10000, 100000, 1000000, 10000000 };
         var structures = new List<(string, Type)>
         {
             ("Lista (Vetor)", typeof(VectorList)),
@@ -127,57 +297,38 @@ class Program
     }
 
     static string FindRatingsFile()
-{
-    // 1. Caminhos prioritários (personalizáveis)
-    var possiblePaths = new List<string>
     {
-        // Caminho local (dentro da pasta do projeto)
-        Path.Combine(Directory.GetCurrentDirectory(), "dataset", "ratings.csv"),
-        
-        // Caminho relativo (para casos em que o executável está em /bin/)
-        Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "dataset", "ratings.csv"),
-        
-        // Caminho absoluto típico (ex: seu desktop)
-        @"/Desktop/ordenacaoAEDS/dataset/ratings.csv",
-        
-        // Caminho para Linux/WSL (se aplicável)
-        "../../dataset/ratings.csv",
-        
-        // Adicione outros caminhos comuns aqui...
-    };
-
-    // 2. Verifica se uma variável de ambiente define o caminho
-    string envPath = Environment.GetEnvironmentVariable("RATINGS_CSV_PATH");
-    if (!string.IsNullOrEmpty(envPath))
-    {
-        possiblePaths.Insert(0, envPath); // Prioriza o caminho da variável de ambiente
-    }
-
-    // 3. Varre todos os caminhos possíveis
-    foreach (string path in possiblePaths)
-    {
-        string fullPath = Path.GetFullPath(path); // Normaliza o caminho
-        Console.WriteLine($"🔍 Procurando em: {fullPath}");
-
-        if (File.Exists(fullPath))
+        var possiblePaths = new List<string>
         {
-            Console.WriteLine($"✅ Arquivo encontrado: {fullPath}");
-            return fullPath;
+            Path.Combine(Directory.GetCurrentDirectory(), "dataset", "ratings.csv"),
+            Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "dataset", "ratings.csv"),
+            @"C:\Desktop\ordenacaoAEDS\dataset\ratings.csv",
+            "../../dataset/ratings.csv",
+            "ratings.csv",
+            "../ratings.csv",
+            "../dataset/ratings.csv"
+        };
+
+        string envPath = Environment.GetEnvironmentVariable("RATINGS_CSV_PATH");
+        if (!string.IsNullOrEmpty(envPath))
+            possiblePaths.Insert(0, envPath);
+
+        foreach (string path in possiblePaths)
+        {
+            string fullPath = Path.GetFullPath(path);
+            if (File.Exists(fullPath))
+            {
+                Console.WriteLine($"✅ Arquivo encontrado: {fullPath}");
+                return fullPath;
+            }
         }
-    }
 
-    // 4. Se nenhum caminho funcionar, exibe ajuda
-    Console.WriteLine("❌ Nenhum caminho válido encontrado para ratings.csv. Tente:");
-    Console.WriteLine("- Colocar o arquivo em uma pasta 'dataset' dentro do projeto;");
-    Console.WriteLine("- Definir a variável de ambiente 'RATINGS_CSV_PATH';");
-    Console.WriteLine("- Verificar se o arquivo existe nos locais:");
-    foreach (string path in possiblePaths)
-    {
-        Console.WriteLine($"  - {Path.GetFullPath(path)}");
-    }
+        Console.WriteLine("❌ Arquivo ratings.csv não encontrado. Procurou em:");
+        foreach (string path in possiblePaths)
+            Console.WriteLine($"  - {Path.GetFullPath(path)}");
 
-    return null;
-}
+        return null;
+    }
 
     static List<Rating> ReadRatings(string filename, int maxEntries)
     {
@@ -189,8 +340,8 @@ class Program
             while (!reader.EndOfStream && ratings.Count < maxEntries)
             {
                 var line = reader.ReadLine();
-                var parts = line.Split(',');
-                if (parts.Length < 4) continue;
+                var parts = line?.Split(',');
+                if (parts?.Length < 4) continue;
 
                 if (int.TryParse(parts[0], out int userId) &&
                     int.TryParse(parts[1], out int movieId) &&
@@ -210,43 +361,207 @@ class Program
     }
 
     static void SortAndMeasureMultipleTimes(List<Rating> ratings, Type structType, int inputSize, bool saveCsv)
-{
-    string metricFile = "metricas.txt";
-
-    // Cria ou sobrescreve e escreve cabeçalho
-    using (var writer = new StreamWriter(metricFile, true))
     {
-        writer.WriteLine($"{structType.Name} {inputSize}");
-    }
+        string metricFile = "metricas.txt";
 
-    for (int i = 1; i <= 10; i++)
-    {
-        var stopwatch = Stopwatch.StartNew();
-
-        var subset = ratings.GetRange(0, Math.Min(inputSize, ratings.Count));
-        subset.Sort((a, b) => a.Timestamp.CompareTo(b.Timestamp));
-
-        stopwatch.Stop();
-        var elapsed = stopwatch.Elapsed;
-
-        Console.WriteLine($"⏱️ Execução {i}: {FormatTime(elapsed)}");
-
-        // Anexa ao arquivo
         using (var writer = new StreamWriter(metricFile, true))
         {
-            writer.WriteLine(elapsed.TotalSeconds.ToString("F6", CultureInfo.InvariantCulture));
+            writer.WriteLine($"{structType.Name} {inputSize}");
         }
+
+        for (int i = 1; i <= 10; i++)
+        {
+            Console.WriteLine($"⏱️ Execução {i}: Preparando {inputSize} registros para ordenação...");
+            
+            var subset = ratings.GetRange(0, Math.Min(inputSize, ratings.Count));
+            var elapsed = SortWithStructure(subset, structType, saveCsv, i, inputSize);
+
+            Console.WriteLine($"⏱️ Execução {i}: {FormatTime(TimeSpan.FromSeconds(elapsed))}");
+
+            using (var writer = new StreamWriter(metricFile, true))
+            {
+                writer.WriteLine(elapsed.ToString("F6", CultureInfo.InvariantCulture));
+            }
+        }
+    }
+
+    static double SortWithStructure(List<Rating> data, Type structType, bool saveCsv, int runNumber, int inputSize)
+    {
+        // Igual ao Python: trabalhar direto com array, estruturas são só para show
+        var array = data.ToArray();
+        
+        var stopwatch = Stopwatch.StartNew();
+        
+        // QUICKSORT PRÓPRIO (não usar Sort() nativo!)
+        Console.WriteLine($"Ordenando {array.Length} registros por movieId usando QuickSort...");
+        QuickSort(array, 0, array.Length - 1);
+
+        stopwatch.Stop();
+        var elapsed = stopwatch.Elapsed.TotalSeconds;
 
         if (saveCsv)
         {
-            string filename = $"sorted_{structType.Name}_{inputSize}_run{i}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
-            SaveRatings(filename, subset);
+            string filename = $"sorted_{structType.Name}_{inputSize}_run{runNumber}_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.csv";
+            SaveRatings(filename, array);
+        }
+
+        return elapsed;
+    }
+
+    static object CreateAndPopulateStructure(List<Rating> data, Type structType)
+    {
+        if (structType == typeof(VectorList))
+        {
+            var list = new VectorList();
+            foreach (var item in data) list.Add(item);
+            return list;
+        }
+        else if (structType == typeof(LinkedList))
+        {
+            var list = new LinkedList();
+            foreach (var item in data) list.Add(item);
+            return list;
+        }
+        else if (structType == typeof(VectorStack))
+        {
+            var stack = new VectorStack();
+            foreach (var item in data) stack.Push(item);
+            return stack;
+        }
+        else if (structType == typeof(LinkedStack))
+        {
+            var stack = new LinkedStack();
+            foreach (var item in data) stack.Push(item);
+            return stack;
+        }
+        else if (structType == typeof(VectorQueue))
+        {
+            var queue = new VectorQueue();
+            foreach (var item in data) queue.Enqueue(item);
+            return queue;
+        }
+        else if (structType == typeof(LinkedQueue))
+        {
+            var queue = new LinkedQueue();
+            foreach (var item in data) queue.Enqueue(item);
+            return queue;
+        }
+        
+        throw new ArgumentException($"Tipo de estrutura não suportado: {structType}");
+    }
+
+    static Rating[] ConvertToArray(object structure)
+    {
+        return structure switch
+        {
+            VectorList list => list.ToArray(),
+            LinkedList list => list.ToArray(),
+            VectorStack stack => stack.ToArray(),
+            LinkedStack stack => stack.ToArray(),
+            VectorQueue queue => queue.ToArray(),
+            LinkedQueue queue => queue.ToArray(),
+            _ => throw new ArgumentException($"Tipo de estrutura não suportado: {structure.GetType()}")
+        };
+    }
+
+    static void ConvertFromArray(Rating[] array, object structure)
+    {
+        switch (structure)
+        {
+            case VectorList list:
+                list.FromArray(array);
+                break;
+            case LinkedList list:
+                list.FromArray(array);
+                break;
+            case VectorStack stack:
+                stack.FromArray(array);
+                break;
+            case LinkedStack stack:
+                stack.FromArray(array);
+                break;
+            case VectorQueue queue:
+                queue.FromArray(array);
+                break;
+            case LinkedQueue queue:
+                queue.FromArray(array);
+                break;
+            default:
+                throw new ArgumentException($"Tipo de estrutura não suportado: {structure.GetType()}");
         }
     }
-}
 
+    // QUICKSORT COM MEDIANA DE TRÊS (igual Python/Julia)
+    static void QuickSort(Rating[] array, int low, int high)
+    {
+        if (low < high)
+        {
+            int pivotIndex = Partition(array, low, high);
+            QuickSort(array, low, pivotIndex - 1);
+            QuickSort(array, pivotIndex + 1, high);
+        }
+    }
 
-    static void SaveRatings(string filename, List<Rating> ratings)
+    static int Partition(Rating[] array, int low, int high)
+    {
+        // MEDIANA DE TRÊS (igual Python)
+        if (high - low >= 2)
+        {
+            int mid = (low + high) / 2;
+
+            // Comparações para encontrar a mediana (ordenando por MovieId igual Python)
+            if (array[low].MovieId > array[mid].MovieId)
+                Swap(array, low, mid);
+            if (array[low].MovieId > array[high].MovieId)
+                Swap(array, low, high);
+            if (array[mid].MovieId > array[high].MovieId)
+                Swap(array, mid, high);
+
+            // Move a mediana para o final
+            Swap(array, mid, high);
+        }
+
+        // Partição Lomuto usando MovieId como pivô
+        int pivot = array[high].MovieId;
+        int i = low - 1;
+
+        for (int j = low; j < high; j++)
+        {
+            if (array[j].MovieId <= pivot)
+            {
+                i++;
+                if (i != j)
+                    Swap(array, i, j);
+            }
+        }
+        
+        Swap(array, i + 1, high);
+        return i + 1;
+    }
+
+    static void InsertionSort(Rating[] array, int low, int high)
+    {
+        for (int i = low + 1; i <= high; i++)
+        {
+            var temp = array[i];
+            int j = i;
+            
+            while (j > low && temp.RatingValue < array[j - 1].RatingValue)
+            {
+                array[j] = array[j - 1];
+                j--;
+            }
+            
+            array[j] = temp;
+        }
+    }
+
+    static void Swap(Rating[] array, int i, int j)
+    {
+        (array[i], array[j]) = (array[j], array[i]);
+    }
+
+    static void SaveRatings(string filename, Rating[] ratings)
     {
         using var writer = new StreamWriter(filename);
         writer.WriteLine("userId,movieId,rating,timestamp");
@@ -254,7 +569,7 @@ class Program
             writer.WriteLine($"{r.UserId},{r.MovieId},{r.RatingValue.ToString(CultureInfo.InvariantCulture)},{r.Timestamp}");
 
         Console.WriteLine($"\n✅ Arquivo {filename} salvo com sucesso.");
-        Console.WriteLine($"   Tamanho: {ratings.Count} registros");
+        Console.WriteLine($"   Tamanho: {ratings.Length} registros");
     }
 
     static string FormatTime(TimeSpan elapsed)
